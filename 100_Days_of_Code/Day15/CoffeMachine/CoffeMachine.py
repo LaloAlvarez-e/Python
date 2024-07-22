@@ -83,19 +83,12 @@ def PrintReport():
 def CheckIngredients(coffeType):
     returnCode = True
     water, milk, coffe = DifferenceBetweenIngredients(coffeType)
-    
-    if(water != None):
-        if water < 0:
-            print("Sorry, there is not enough water to make that flavor.")
-            returnCode = False  
-    if(milk != None):
-        if milk < 0:
-            print("Sorry, there is not enough milk to make that flavor.")
-            returnCode = False
-    if(coffe != None):
-        if coffe < 0:
-            print("Sorry, there is not enough coffee to make that flavor.")
-            returnCode = False
+    differences = [water, milk, coffe]       
+    for item in differences:
+        if(water != None):
+            if water < 0:
+                print(f"Sorry there is not enough {item} to make that flavor.")
+                returnCode = False  
     return returnCode
 
 def DispatchCoffee(coffeType):
@@ -120,41 +113,54 @@ def DeliverCoffer(coffeType):
 
 def GetCashInCoins(coffeType):
     money = GetSpecificData(coffeType)[0]
-    coins = [0.01, 0.05, 0.10, 0.25]
     cash = round(money, 2)
-    cashInCoins = []
-    while(cash > 0):
+    totalReceived = 0
+    left = cash
+    while(left > 0):
         quarters = 0
         dimes = 0
         nickels = 0
         pennies = 0
         try:
             quarters = int(input("How many quarters?: "))
-        except
-            print(f"Please enter a valid number of quarters. it is considered as 0")
+        except:
+            print(f"Next time, please enter a valid number of quarters. it is considered as 0")
         try:
             dimes = int(input("How many dimes?: "))
         except:
-            print(f"Please enter a valid number of dimes. it is considered as 0")
+            print(f"Next time, please enter a valid number of dimes. it is considered as 0")
         try:
             nickels = int(input("How many nickels?: "))
         except:
-            print(f"Please enter a valid number of nickels. it is considered as 0")
+            print(f"Next time, please enter a valid number of nickels. it is considered as 0")
         try:
             pennies = int(input("How many pennies?: "))
         except:
-            print(f"Please enter a valid number of pennies. it is considered as 0")
+            print(f"Next time, please enter a valid number of pennies. it is considered as 0")
         quartersMoney = round(quarters * 0.25, 2)
         dimesMoney = round(dimes * 0.10, 2)
         nickelsMoney = round(nickels * 0.05, 2)
         penniesMoney = round(pennies * 0.01, 2)
-        totalReceived = quartersMoney + dimesMoney + nickelsMoney + penniesMoney
-        cash = round(cash - totalReceived, 2)
-            coin = random.choice(coins)
-            if cash - coin >= 0:
-                cashInCoins.append(coin)
-                cash -= coin
-    return cashInCoins
+        received = round(quartersMoney + dimesMoney + nickelsMoney + penniesMoney, 2)
+        if(received <= 0):
+            break
+        totalReceived += round(quartersMoney + dimesMoney + nickelsMoney + penniesMoney, 2)
+        left = round(cash - totalReceived, 2)
+        if(left > 0):
+            print(f"Sorry, that's not enough money. Please insert ${left} more.")
+    return totalReceived
+
+def calculateChange(coffeType, cash):
+    money = GetSpecificData(coffeType)[0]
+    diff = round(cash - money, 2)
+    change = cash
+    if diff < 0:
+        print(f"Sorry, that's not enough money. Money refunded. ${change}")
+    else:
+        print(f"Here is ${change} in change.")
+        change = diff
+    
+    return change
 
 def MachineRefill():
     UpdateSpecificData("report", 0.00, coffeRefill['water'], coffeRefill['milk'], coffeRefill['coffee'])
@@ -171,8 +177,13 @@ def main():
            PrintReport()
         elif(coffeType == "refill"):
             MachineRefill()
+        elif(coffeType == "off"):
+            running = False
         elif coffeType in hotFlavors:
-           DeliverCoffer(coffeType)
+            cash = GetCashInCoins(coffeType)
+            change = calculateChange(coffeType, cash)
+            if change != cash:
+                DeliverCoffer(coffeType)
         else:
             print("Sorry, we don't have that flavor.")
 
