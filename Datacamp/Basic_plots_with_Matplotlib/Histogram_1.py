@@ -1,4 +1,4 @@
-#!E:\GIT\Python\Datacamp\Basic_plots_with_Matplotlib\venv\Scripts\python.exe
+#!C:\git\Python\Datacamp\Basic_plots_with_Matplotlib\venv\Scripts\python.exe
 
 import matplotlib.pyplot as plt
 
